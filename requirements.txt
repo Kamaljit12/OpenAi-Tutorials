@@ -3,3 +3,7 @@ numpy
 langchain-community
 pypdf
 python-dotenv
+langchain_openai
+langchain_huggingface
+langchain_groq
+streamlit
