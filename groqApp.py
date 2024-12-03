@@ -18,6 +18,14 @@ from langchain_core.prompts import ChatPromptTemplate
 import streamlit as st
 # operating syestem control by os
 import os
+## in my local pc sqllite3 was not supported so then below code is the solution of this problems
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+## building same vector db
+from langchain_chroma import Chroma
+
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -55,7 +63,7 @@ def create_vector_embeddings():
         st.session_state.documents = st.session_state.loader.load() ## documnet loading
         st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.documents[:50])
-        st.session_state.vectors = FAISS().from_documents(st.session_state.final_documents, st.session_state.embeddings)
+        st.session_state.vectors = Chroma.from_documents(st.session_state.final_documents, st.session_state.embeddings)
 
 user_prompt = st.text_input("Enter your query form the research paper")
 

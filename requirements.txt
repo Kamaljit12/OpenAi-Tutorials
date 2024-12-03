@@ -8,3 +8,6 @@ langchain_huggingface
 langchain_groq
 streamlit
 faiss-cpu
+langchain_chroma
+pysqlite3-binary
+chromadb
