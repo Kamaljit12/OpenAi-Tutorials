@@ -1,5 +1,5 @@
 ## pdf docs loader
-from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain_community.document_loaders import PyPDFDirectoryLoader, PyPDFLoader
 ## text splitter
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 ## huggingface embeddings
@@ -40,8 +40,9 @@ groq_api_key = os.getenv('GROQ_API_KEY')
 st.title("ChatGroq Q&A Chatbaot")
 
 ## llm
-model_name = "Llama3-8b-8192"
-llm = ChatGroq(groq_api_key=groq_api_key, model_name = model_name)
+llm_model_name = "Llama3-8b-8192"
+hf_embedding_model = 'all-MiniLM-L6-v2'
+llm = ChatGroq(groq_api_key=groq_api_key, model_name = llm_model_name)
 
 prompt = ChatPromptTemplate.from_template(
     """
@@ -56,14 +57,14 @@ prompt = ChatPromptTemplate.from_template(
 
 def create_vector_embeddings():
     if "vector" not in st.session_state:
-        ## huggingface embeddings
-        st.session_state.embeddings = HuggingFaceEmbeddings()
+    ## huggingface embeddings
+        st.session_state.embeddings = HuggingFaceEmbeddings(model_name=hf_embedding_model)
         ## document loader
-        st.session_state.loader = PyPDFDirectoryLoader("pdf_dir") ## data ingetion step
+        st.session_state.loader = PyPDFLoader("/workspaces/OpenAi-Tutorials/pdf_dir/Attention Machanism.pdf") ## data ingetion step
         st.session_state.documents = st.session_state.loader.load() ## documnet loading
         st.session_state.text_splitter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
         st.session_state.final_documents = st.session_state.text_splitter.split_documents(st.session_state.documents[:50])
-        st.session_state.vectors = Chroma.from_documents(st.session_state.final_documents, st.session_state.embeddings)
+        st.session_state.vectors = FAISS.from_documents(st.session_state.final_documents, st.session_state.embeddings)
 
 user_prompt = st.text_input("Enter your query form the research paper")
 
@@ -85,7 +86,7 @@ if user_prompt:
     ## with streamlit expander
     with st.expander("Documnet similarity search"):
         for i, doc in enumerate(response['context']):
-            st.write(doc.page_context)
+            st.write(doc.page_content)
             st.write("----------------------------------------")
 
 
